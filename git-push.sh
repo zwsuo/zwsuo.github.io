@@ -30,4 +30,4 @@ git pull origin $featureBranch
 checkConfict
 
 git push origin $featureBranch
-echo -e "[\033[32mOK\033[0m] $featureBranch 分支push完成"
+echo "[\033[32mOK\033[0m] $featureBranch 分支push完成"
