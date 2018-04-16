@@ -5,22 +5,9 @@
     <link>http://zwsuo.github.io/tech/</link>
     <description>Recent content in Tech on zwsuo&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator>
-    <lastBuildDate>Fri, 12 Jan 2018 17:31:59 +0800</lastBuildDate>
     
 	<atom:link href="http://zwsuo.github.io/tech/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>Hugo&#43;Github</title>
-      <link>http://zwsuo.github.io/tech/hugo&#43;github/</link>
-      <pubDate>Fri, 12 Jan 2018 17:31:59 +0800</pubDate>
-      
-      <guid>http://zwsuo.github.io/tech/hugo&#43;github/</guid>
-      <description>Hugo 配合 Github 实现个人静态博客  一直想弄个稳定、简单、好看的个人博客，记录下自己的思想、感悟、技术，及一些有趣的东西。现在好了，可以使用 Hugo 配合 Github 来完成了。
-简单来说，就是使用 Hugo 这个转换引擎将 markdown 文件转为 html 静态资源，然后将静态资源传到 Github 上。
- 步骤：
- 1. 在 Github 上创建自己的 repo。 2. 在自己电脑上配置好 Hugo。 3. 创建 .md 文件然后使用 Hugo 引擎转换为 html。 4. 上传生成的 html 资源到第一步中的 repo。   详细步骤每一个都很多，就不细述了，因为每一步都有对应的官方文档可以参考，很详细。</description>
-    </item>
     
   </channel>
 </rss>
