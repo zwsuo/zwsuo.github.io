@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<meta name='description' content='Huge page (大内存页) 到底是个啥   学习 Linux 中的大内存页 huge page。理解什么是“大内存页”，如何进行配置，如何查看当前状态以及如何禁用它。
+ 本文中我们会详细介绍大内存页 huge page ，让你能够回答：Linux 中的“大内存页”是什么？在 RHEL6、RHEL7、Ubuntu 等 Linux 中，如何启用/禁用“大内存页”？如何查看“大内存页”的当前值？
+首先让我们从“大内存页”的基础知识开始讲起。
+Linux 中的“大内存页”是个什么玩意？
+“大内存页”有助于 Linux 系统进行虚拟内存管理。顾名思义，除了标准的 4KB 大小的页面外，它们还能帮助管理内存中的巨大的页面。使用“大内存页”，你最大可以定义 1GB 的页面大小。
+在系统启动期间，你能用“大内存页”为应用程序预留一部分内存。这部分内存，即被“大内存页”占用的这些存储器永远不会被交换出内存。它会一直保留其中，除非你修改了配置。这会极大地提高像 Oracle 数据库这样的需要海量内存的应用程序的性能。
+为什么使用“大内存页”？
+在虚拟内存管理中，内核维护一个将虚拟内存地址映射到物理地址的表，对于每个页面操作，内核都需要加载相关的映射。如果你的内存页很小，那么你需要加载的页就会很多，导致内核会加载更多的映射表。而这会降低性能。
+使用“大内存页”，意味着所需要的页变少了。从而大大减少由内核加载的映射表的数量。这提高了内核级别的性能最终有利于应用程序的性能。
+简而言之，通过启用“大内存页”，系统具只需要处理较少的页面映射表，从而减少访问/维护它们的开销！
+如何配置“大内存页”？
+运行下面命令来查看当前“大内存页”的详细内容。
+root@kerneltalks # grep Huge /proc/meminfo AnonHugePages: 0 kB HugePages_Total: 0 HugePages_Free: 0 HugePages_Rsvd: 0 HugePages_Surp: 0 Hugepagesize: 2048 kB 从上面输出可以看到，每个页的大小为 2MB（Hugepagesize），并且系统中目前有 0个“大内存页”（HugePages_Total）。这里“大内存页”的大小可以从 2MB 增加到 1GB。
+运行下面的脚本可以知道系统当前需要多少个巨大页。该脚本取之于 Oracle。
+#!/bin/bash # # hugepages_settings.'>
+
+<meta property='og:title' content='Huge page (大内存页) 到底是个啥 • zwsuo&#39;s Blog'>
+<meta property='og:description' content='Huge page (大内存页) 到底是个啥   学习 Linux 中的大内存页 huge page。理解什么是“大内存页”，如何进行配置，如何查看当前状态以及如何禁用它。
+ 本文中我们会详细介绍大内存页 huge page ，让你能够回答：Linux 中的“大内存页”是什么？在 RHEL6、RHEL7、Ubuntu 等 Linux 中，如何启用/禁用“大内存页”？如何查看“大内存页”的当前值？
+首先让我们从“大内存页”的基础知识开始讲起。
+Linux 中的“大内存页”是个什么玩意？
+“大内存页”有助于 Linux 系统进行虚拟内存管理。顾名思义，除了标准的 4KB 大小的页面外，它们还能帮助管理内存中的巨大的页面。使用“大内存页”，你最大可以定义 1GB 的页面大小。
+在系统启动期间，你能用“大内存页”为应用程序预留一部分内存。这部分内存，即被“大内存页”占用的这些存储器永远不会被交换出内存。它会一直保留其中，除非你修改了配置。这会极大地提高像 Oracle 数据库这样的需要海量内存的应用程序的性能。
+为什么使用“大内存页”？
+在虚拟内存管理中，内核维护一个将虚拟内存地址映射到物理地址的表，对于每个页面操作，内核都需要加载相关的映射。如果你的内存页很小，那么你需要加载的页就会很多，导致内核会加载更多的映射表。而这会降低性能。
+使用“大内存页”，意味着所需要的页变少了。从而大大减少由内核加载的映射表的数量。这提高了内核级别的性能最终有利于应用程序的性能。
+简而言之，通过启用“大内存页”，系统具只需要处理较少的页面映射表，从而减少访问/维护它们的开销！
+如何配置“大内存页”？
+运行下面命令来查看当前“大内存页”的详细内容。
+root@kerneltalks # grep Huge /proc/meminfo AnonHugePages: 0 kB HugePages_Total: 0 HugePages_Free: 0 HugePages_Rsvd: 0 HugePages_Surp: 0 Hugepagesize: 2048 kB 从上面输出可以看到，每个页的大小为 2MB（Hugepagesize），并且系统中目前有 0个“大内存页”（HugePages_Total）。这里“大内存页”的大小可以从 2MB 增加到 1GB。
+运行下面的脚本可以知道系统当前需要多少个巨大页。该脚本取之于 Oracle。
+#!/bin/bash # # hugepages_settings.'>
+<meta property='og:url' content='http://zwsuo.github.io/tech/hugepage/'>
+<meta property='og:site_name' content='zwsuo&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Tech'><meta property='article:published_time' content='2018-02-21T17:31:59&#43;08:00'/><meta property='article:modified_time' content='2018-02-21T17:31:59&#43;08:00'/><meta name='twitter:card' content='summary'>
+
+<meta name="generator" content="Hugo 0.38.2" />
+
+  <title>Huge page (大内存页) 到底是个啥 • zwsuo&#39;s Blog</title>
+  <link rel='canonical' href='http://zwsuo.github.io/tech/hugepage/'>
+  
+  
+  <link rel='icon' href='/favicon.ico'>
+<link rel='stylesheet' href='/assets/css/main.f0e8df71.css'><link rel='stylesheet' href='/css/custom.css'>
+</head>
+
+
+<body class='page type-tech'>
+  <div class='site'>
+
+    <a class='screen-reader' href='#main'>Skip to Content</a>
+
+    <header id='header' class='header-container'>
+      <div class='header site-header'>
+        <nav id='main-menu' class='main-menu-container' aria-label='Main Menu'>
+  <ul class='main-menu'>
+  <li>
+      <a href='/'>Home</a>
+    </li>
+  <li>
+      <a href='/tech/'>Tech</a>
+    </li>
+  <li>
+      <a href='/typography/'>Typography</a>
+    </li>
+  <li>
+      <a href='/about/'>About</a>
+    </li>
+  
+  </ul>
+</nav>
+
+        <div class='header-info'>
+          
+          <p class='site-title title'>zwsuo&#39;s Blog</p>
+          
+          <p class='site-description subtitle'>Here&#39;s my life...</p>
+        </div>
+      </div>
+    </header>
+
+
+<main id='main' class='main'>
+  <article lang='en' class='entry'>
+    <header class='header-container'>
+  <div class='header entry-header'>
+    <div class='header-info'>
+      <h1 class='title'>Huge page (大内存页) 到底是个啥</h1>
+      
+
+    </div>
+    
+<div class='meta'>
+  <span class='posted-on'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+  <line x1="16" y1="2" x2="16" y2="6"/>
+  <line x1="8" y1="2" x2="8" y2="6"/>
+  <line x1="3" y1="10" x2="21" y2="10"/>
+  
+</svg>
+<span class='screen-reader'>Posted on </span>
+  <time class='date' datetime='2018-02-21T17:31:59&#43;08:00'>2018, Feb 21</time>
+</span>
+
+  
+  
+<span class='reading-time'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <circle cx="12" cy="12" r="10"/>
+  <polyline points="12 6 12 12 15 15"/>
+  
+</svg>
+2 mins read
+</span>
+
+
+</div>
+
+
+  </div>
+</header>
+
+    
+    
+
+    <div class='entry-content'>
+  <div class='align-center'>
+  <h3 id="huge-page-大内存页-到底是个啥">Huge page (大内存页) 到底是个啥</h3>
+
+</div>
+
+
+<hr />
+
+<blockquote>
+<p>学习 Linux 中的大内存页 huge page。理解什么是“大内存页”，如何进行配置，如何查看当前状态以及如何禁用它。</p>
+</blockquote>
+
+<p>本文中我们会详细介绍大内存页 huge page ，让你能够回答：Linux 中的“大内存页”是什么？在 RHEL6、RHEL7、Ubuntu 等 Linux 中，如何启用/禁用“大内存页”？如何查看“大内存页”的当前值？</p>
+
+<p>首先让我们从“大内存页”的基础知识开始讲起。</p>
+
+<p>Linux 中的“大内存页”是个什么玩意？</p>
+
+<p>“大内存页”有助于 Linux 系统进行虚拟内存管理。顾名思义，除了标准的 4KB 大小的页面外，它们还能帮助管理内存中的巨大的页面。使用“大内存页”，你最大可以定义 1GB 的页面大小。</p>
+
+<p>在系统启动期间，你能用“大内存页”为应用程序预留一部分内存。这部分内存，即被“大内存页”占用的这些存储器永远不会被交换出内存。它会一直保留其中，除非你修改了配置。这会极大地提高像 Oracle 数据库这样的需要海量内存的应用程序的性能。</p>
+
+<p>为什么使用“大内存页”？</p>
+
+<p>在虚拟内存管理中，内核维护一个将虚拟内存地址映射到物理地址的表，对于每个页面操作，内核都需要加载相关的映射。如果你的内存页很小，那么你需要加载的页就会很多，导致内核会加载更多的映射表。而这会降低性能。</p>
+
+<p>使用“大内存页”，意味着所需要的页变少了。从而大大减少由内核加载的映射表的数量。这提高了内核级别的性能最终有利于应用程序的性能。</p>
+
+<p>简而言之，通过启用“大内存页”，系统具只需要处理较少的页面映射表，从而减少访问/维护它们的开销！</p>
+
+<p>如何配置“大内存页”？</p>
+
+<p>运行下面命令来查看当前“大内存页”的详细内容。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Shell" data-lang="Shell">root@kerneltalks <span style="color:#75715e"># grep Huge /proc/meminfo
+</span><span style="color:#75715e"></span>AnonHugePages: <span style="color:#ae81ff">0</span> kB
+HugePages_Total: <span style="color:#ae81ff">0</span>
+HugePages_Free: <span style="color:#ae81ff">0</span>
+HugePages_Rsvd: <span style="color:#ae81ff">0</span>
+HugePages_Surp: <span style="color:#ae81ff">0</span>
+Hugepagesize: <span style="color:#ae81ff">2048</span> kB</code></pre></div>
+<p>从上面输出可以看到，每个页的大小为 2MB（<strong>Hugepagesize</strong>），并且系统中目前有 <code>0</code>个“大内存页”（<strong>HugePages_Total</strong>）。这里“大内存页”的大小可以从 <code>2MB</code> 增加到 <code>1GB</code>。</p>
+
+<p>运行下面的脚本可以知道系统当前需要多少个巨大页。该脚本取之于 Oracle。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e">#!/bin/bash
+</span><span style="color:#75715e"></span><span style="color:#75715e">#
+</span><span style="color:#75715e"># hugepages_settings.sh
+</span><span style="color:#75715e">#
+</span><span style="color:#75715e"># Linux bash script to compute values for the
+</span><span style="color:#75715e"># recommended HugePages/HugeTLB configuration
+</span><span style="color:#75715e">#
+</span><span style="color:#75715e"># Note: This script does calculation for all shared memory
+</span><span style="color:#75715e"># segments available when the script is run, no matter it
+</span><span style="color:#75715e"># is an Oracle RDBMS shared memory segment or not.
+</span><span style="color:#75715e"># Check for the kernel version
+</span><span style="color:#75715e"></span>KERN<span style="color:#f92672">=</span><span style="color:#e6db74">`</span>uname -r | awk -F. <span style="color:#e6db74">&#39;{ printf(&#34;%d.%d\n&#34;,$1,$2); }&#39;</span><span style="color:#e6db74">`</span>
+<span style="color:#75715e"># Find out the HugePage size
+</span><span style="color:#75715e"></span>HPG_SZ<span style="color:#f92672">=</span><span style="color:#e6db74">`</span>grep Hugepagesize /proc/meminfo | awk <span style="color:#f92672">{</span><span style="color:#e6db74">&#39;print $2&#39;</span><span style="color:#f92672">}</span><span style="color:#e6db74">`</span>
+<span style="color:#75715e"># Start from 1 pages to be on the safe side and guarantee 1 free HugePage
+</span><span style="color:#75715e"></span>NUM_PG<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>
+<span style="color:#75715e"># Cumulative number of pages required to handle the running shared memory segments
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">for</span> SEG_BYTES in <span style="color:#e6db74">`</span>ipcs -m | awk <span style="color:#f92672">{</span><span style="color:#e6db74">&#39;print $5&#39;</span><span style="color:#f92672">}</span> | grep <span style="color:#e6db74">&#34;[0-9][0-9]*&#34;</span><span style="color:#e6db74">`</span>
+<span style="color:#66d9ef">do</span>
+   MIN_PG<span style="color:#f92672">=</span><span style="color:#e6db74">`</span>echo <span style="color:#e6db74">&#34;</span>$SEG_BYTES<span style="color:#e6db74">/(</span>$HPG_SZ<span style="color:#e6db74">*1024)&#34;</span> | bc -q<span style="color:#e6db74">`</span>
+   <span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> $MIN_PG -gt <span style="color:#ae81ff">0</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
+      NUM_PG<span style="color:#f92672">=</span><span style="color:#e6db74">`</span>echo <span style="color:#e6db74">&#34;</span>$NUM_PG<span style="color:#e6db74">+</span>$MIN_PG<span style="color:#e6db74">+1&#34;</span> | bc -q<span style="color:#e6db74">`</span>
+   <span style="color:#66d9ef">fi</span>
+<span style="color:#66d9ef">done</span>
+<span style="color:#75715e"># Finish with results
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">case</span> $KERN in
+   <span style="color:#e6db74">&#39;2.4&#39;</span><span style="color:#f92672">)</span> HUGETLB_POOL<span style="color:#f92672">=</span><span style="color:#e6db74">`</span>echo <span style="color:#e6db74">&#34;</span>$NUM_PG<span style="color:#e6db74">*</span>$HPG_SZ<span style="color:#e6db74">/1024&#34;</span> | bc -q<span style="color:#e6db74">`</span>;
+          echo <span style="color:#e6db74">&#34;Recommended setting: vm.hugetlb_pool = </span>$HUGETLB_POOL<span style="color:#e6db74">&#34;</span> ;;
+   <span style="color:#e6db74">&#39;2.6&#39;</span> | <span style="color:#e6db74">&#39;3.8&#39;</span> | <span style="color:#e6db74">&#39;3.10&#39;</span> | <span style="color:#e6db74">&#39;4.1&#39;</span> <span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Recommended setting: vm.nr_hugepages = </span>$NUM_PG<span style="color:#e6db74">&#34;</span> ;;
+    *<span style="color:#f92672">)</span> echo <span style="color:#e6db74">&#34;Unrecognized kernel version </span>$KERN<span style="color:#e6db74">. Exiting.&#34;</span> ;;
+<span style="color:#66d9ef">esac</span>
+# End</code></pre></div>
+<p>将它以 <code>hugepages_settings.sh</code> 为名保存到 <code>/tmp</code> 中，然后运行之：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Shell" data-lang="Shell">root@kerneltalks <span style="color:#75715e"># sh /tmp/hugepages_settings.sh
+</span><span style="color:#75715e"></span>Recommended setting: vm.nr_hugepages <span style="color:#f92672">=</span> <span style="color:#ae81ff">124</span></code></pre></div>
+<p>你的输出类似如上结果，只是数字会有一些出入。</p>
+
+<p>这意味着，你系统需要 124 个每个 2MB 的“大内存页”！若你设置页面大小为 4MB，则结果就变成了 62。你明白了吧？</p>
+
+<p>配置内核中的“大内存页”</p>
+
+<p>本文最后一部分内容是配置上面提到的 内核参数 [1] ，然后重新加载。将下面内容添加到 <code>/etc/sysctl.conf</code> 中，然后输入 <code>sysctl -p</code> 命令重新加载配置。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Shell" data-lang="Shell">vm.nr_hugepages<span style="color:#f92672">=</span><span style="color:#ae81ff">126</span></code></pre></div>
+<p>注意我们这里多加了两个额外的页，因为我们希望在实际需要的页面数量之外多一些额外的空闲页。</p>
+
+<p>现在，内核已经配置好了，但是要让应用能够使用这些“大内存页”还需要提高内存的使用阀值。新的内存阀值应该为 126 个页 x 每个页 2 MB = 252 MB，也就是 258048 KB。</p>
+
+<p>你需要编辑 <code>/etc/security/limits.conf</code> 中的如下配置：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">soft memlock <span style="color:#ae81ff">258048</span>
+hard memlock <span style="color:#ae81ff">258048</span></code></pre></div>
+<p>某些情况下，这些设置是在指定应用的文件中配置的，比如 Oracle DB 就是在 <code>/etc/security/limits.d/99-grid-oracle-limits.conf</code> 中配置的。</p>
+
+<p>这就完成了！你可能还需要重启应用来让应用来使用这些新的巨大页。</p>
+
+<p>如何禁用“大内存页”？</p>
+
+<p>“大内存页”默认是开启的。使用下面命令来查看“大内存页”的当前状态。</p>
+
+<pre><code>root@kerneltalks# cat /sys/kernel/mm/transparent_hugepage/enabled
+[always] madvise never
+</code></pre>
+
+<p>输出中的 <code>[always]</code> 标志说明系统启用了“大内存页”。</p>
+
+<p>若使用的是基于 RedHat 的系统，则应该要查看的文件路径为 <code>/sys/kernel/mm/redhat_transparent_hugepage/enabled</code>。</p>
+
+<p>若想禁用“大内存页”，则在 <code>/etc/grub.conf</code> 中的 <code>kernel</code> 行后面加上 <code>transparent_hugepage=never</code>，然后重启系统。</p>
+
+</div>
+
+    
+<footer class='entry-footer-container'>
+  <div class='entry-footer'>
+  
+  </div>
+</footer>
+
+
+  </article>
+  
+<nav class='entry-nav-container'>
+  <div class='entry-nav'><div class='prev-entry'>
+      <a href='/tech/hugo&#43;github/'>
+        <span aria-hidden='true'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <line x1="20" y1="12" x2="4" y2="12"/>
+  <polyline points="10 18 4 12 10 6"/>
+  
+</svg>
+ Previous</span>
+        <span class='screen-reader'>Previous post: </span>Hugo&#43;Github</a>
+    </div></div>
+</nav>
+
+  
+</main>
+
+    <footer id='footer' class='footer-container'>
+      <div class='footer'>
+        <div class='social-menu-container'>
+  <nav aria-label='Social Menu'>
+    <ul class='social-menu'><li>
+        <a href='https://github.com/zwsuo' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Open Github account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='https://facebook.com/zwsuo' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Open Facebook account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='https://twitter.com/zwsuo' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Open Twitter account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='https://instagram.com/izwsuo' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Open Instagram account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+  <line x1="17.5" y1="6.5" x2="17.5" y2="6.5"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='mailto:izwsuo@gmail.com' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Contact via Email</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+  <polyline points="22,6 12,13 2,6"/>
+  
+</svg>
+</a>
+      </li></ul>
+  </nav>
+</div>
+        <div class='copyright'>
+  <p>
+        
+      
+
+       &copy; 2018 zwsuo 
+  </p>
+</div>
+
+      </div>
+    </footer>
+
+  </div><script src='/assets/js/main.5871befd.js'></script><script src='/js/custom.js'></script></body>
+
+</html>
+
