@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<meta name='description' content='运维体系应该是啥样子   作者：刀把五
+链接：https://www.zhihu.com/question/23228213/answer/116940889
+来源：知乎
+著作权归作者所有。
+ 结合现在云计算和DevOps的发展趋势，我觉得一个成熟的自动化运维平台应该包括以下的特性：
+一、支持混合云的CMDB 现在越来越多的服务器都转到了云上，而主流的公有云、私有云平台都拥有比较完备的资源管理的API，这些API也就是构建一个自动化CMDB的基础。
+新一代的自动化运维平台应该是可以基于这些API来自动维护和管理相关的服务器、存储、网络、负载均衡的资源的。
+通过API对资源的操作都应该被作为操作日志记录下来，以备作为后续操作审计的基础数据。
+CMDB这个东西听上去是老生常谈，但这个确实是所有运维工具的基础设施。
+而基于开源工具做运维平台最大的麻烦，就是如何在各个工具之间把CMDB统一起来。
+CMDB不统一起来，就意味着一旦要增加一台服务器，可能要在各个运维工具里面都要同步一下，这个还是非常折腾滴。
+二、比较完备的监控&#43;应用性能分析（APM） 能支持对平台的可用性、服务器的性能、各种服务（web服务、应用服务、数据库服务）的性能进行监控。做的好一些应该能进行更深入、或者关联性的性能分析。
+现在市面上一般都会将资源性能监控和应用性能监控（APM）混合着讲，这里面的产品确实也有很多都是重叠的，两方面都会涉及到。
+开源的性能监控系统主流有的Zabbix、Nagios，国产的开源监控平台有小米OpenFalcon，但这些基本都只是做基本的资源监控（服务器，磁盘、网络等）和简单的服务软件的性能监控（中间件，数据库等）。
+而市面上的APM系统更主打的功能是应用性能分析，比如能精确定位到某个应用的URL的访问速度快慢，某些SQL执行速度的快慢，这些对于开发人员和运维人员快速定位问题还是很有帮助的。
+APM这方面的商业工具，国外比较主流的有New Reclic、Dynatrace，国内的也就是透视宝、Oneapm、听云等，他们也提供了API进行集成。
+APM这方面的开源工具有pinpoint（一个韩国团队开源的），zipkin（twitter开源），cat（大众点评开源）。
+三、有一个还不错UI的批量运维工具 在业务发展比较快的情况下，从几台服务器，到几十台服务器，再到几百台服务器，批量运维的需求很自然就产生了，老板也希望越少的人干越多的活。
+现在也有不少开源的批量运维工具，也都比较成熟了，比如puppet、chef、ansible、saltstack。
+puppet和chef都是ruby做的，实话实说，ruby的熟手市面上很少，比python不是难招一点。
+我个人比较推荐使用ansible或者saltstack，这两个系统都是python写的，代码质量和社区活跃度都挺不错的。
+ansible有官方的web ui——Tower，但实话实说不好用，所以我们也在重新做一套自己用起来更顺手的WEB UI。
+四、日志集中分析工具 线上系统最常规的问题定位方式，就是日志分析了。
+随着服务器的增多，日志的分析定位也成为一个难点和痛点（想象一下，系统出故障之后，要去几十甚至数百个节点去上去查日志，是有多折腾）。
+国内有一家叫日志易的公司，是专门做日志分析方面的运维工具的。
+另外还有一家log insight，也是做这个领域，但产品好像还处于beta阶段。
+日志分析这个领域现在是一个热点，现在的开源方案也比较多了，比如著名的ELKStack，还有Flume&#43;Kafka&#43;Storm的体系。
+上面这两个方案相对重一些，部署比较复杂，网上介绍的文章也不少。
+比较轻量级的开源日志集中采集方案有python做的Sentry，他是通过改造各种语言的日志采集框架来实现日志的集中采集，各种主流的开发语言的日志框架都支持得很完整了，比如java的log4j和logpack。
+Sentry的官网在此：Sentry - Track exceptions with modern error logging for JavaScript, Python, Ruby, Java, and Node.js
+五、持续集成和发布工具 这方面其实比较难有统一的需求，很多公司集成发布的做法都差异挺大的。
+持续集成方面，一般用jekins的比较多，这方面网上介绍的文章也很多。
+而如何把打好的包发布至各台服务器，则可以通过批量运维工具或者脚本来完成了。
+版本发布的过程涉及到很多细节，包括了版本文件的上传、分发、版本管理、回滚等各种操作。
+对于一般不太复杂的项目，我比较推荐的做法是把打包好的文件上传到svn上，然后通过脚本在各台服务器上进行发布操作就行了，这样其实是利用了SVN来完成文件的上传、分发、版本管理、回滚等各种操作。
+六、安全漏洞扫描工具 现在一个稍微有点知名度的系统，都会遭受各种各样的安全攻击的折磨。
+一般的公司不太可能请得起专职的安全工程师，所以运维工程师最好能自己借助一些安全扫描工具来发现自己系统的漏洞。
+安全工具方面我了解不多，不太熟这个领域的开源工具。
+之前乌云网推出过一个SaaS化的漏扫平台——唐朝巡航，有对外提供漏洞扫描的API，不过最近乌云网一直在升级，所以也就暂时无法调用了。'>
+
+<meta property='og:title' content='运维体系应该是啥样子 • zwsuo&#39;s Blog'>
+<meta property='og:description' content='运维体系应该是啥样子   作者：刀把五
+链接：https://www.zhihu.com/question/23228213/answer/116940889
+来源：知乎
+著作权归作者所有。
+ 结合现在云计算和DevOps的发展趋势，我觉得一个成熟的自动化运维平台应该包括以下的特性：
+一、支持混合云的CMDB 现在越来越多的服务器都转到了云上，而主流的公有云、私有云平台都拥有比较完备的资源管理的API，这些API也就是构建一个自动化CMDB的基础。
+新一代的自动化运维平台应该是可以基于这些API来自动维护和管理相关的服务器、存储、网络、负载均衡的资源的。
+通过API对资源的操作都应该被作为操作日志记录下来，以备作为后续操作审计的基础数据。
+CMDB这个东西听上去是老生常谈，但这个确实是所有运维工具的基础设施。
+而基于开源工具做运维平台最大的麻烦，就是如何在各个工具之间把CMDB统一起来。
+CMDB不统一起来，就意味着一旦要增加一台服务器，可能要在各个运维工具里面都要同步一下，这个还是非常折腾滴。
+二、比较完备的监控&#43;应用性能分析（APM） 能支持对平台的可用性、服务器的性能、各种服务（web服务、应用服务、数据库服务）的性能进行监控。做的好一些应该能进行更深入、或者关联性的性能分析。
+现在市面上一般都会将资源性能监控和应用性能监控（APM）混合着讲，这里面的产品确实也有很多都是重叠的，两方面都会涉及到。
+开源的性能监控系统主流有的Zabbix、Nagios，国产的开源监控平台有小米OpenFalcon，但这些基本都只是做基本的资源监控（服务器，磁盘、网络等）和简单的服务软件的性能监控（中间件，数据库等）。
+而市面上的APM系统更主打的功能是应用性能分析，比如能精确定位到某个应用的URL的访问速度快慢，某些SQL执行速度的快慢，这些对于开发人员和运维人员快速定位问题还是很有帮助的。
+APM这方面的商业工具，国外比较主流的有New Reclic、Dynatrace，国内的也就是透视宝、Oneapm、听云等，他们也提供了API进行集成。
+APM这方面的开源工具有pinpoint（一个韩国团队开源的），zipkin（twitter开源），cat（大众点评开源）。
+三、有一个还不错UI的批量运维工具 在业务发展比较快的情况下，从几台服务器，到几十台服务器，再到几百台服务器，批量运维的需求很自然就产生了，老板也希望越少的人干越多的活。
+现在也有不少开源的批量运维工具，也都比较成熟了，比如puppet、chef、ansible、saltstack。
+puppet和chef都是ruby做的，实话实说，ruby的熟手市面上很少，比python不是难招一点。
+我个人比较推荐使用ansible或者saltstack，这两个系统都是python写的，代码质量和社区活跃度都挺不错的。
+ansible有官方的web ui——Tower，但实话实说不好用，所以我们也在重新做一套自己用起来更顺手的WEB UI。
+四、日志集中分析工具 线上系统最常规的问题定位方式，就是日志分析了。
+随着服务器的增多，日志的分析定位也成为一个难点和痛点（想象一下，系统出故障之后，要去几十甚至数百个节点去上去查日志，是有多折腾）。
+国内有一家叫日志易的公司，是专门做日志分析方面的运维工具的。
+另外还有一家log insight，也是做这个领域，但产品好像还处于beta阶段。
+日志分析这个领域现在是一个热点，现在的开源方案也比较多了，比如著名的ELKStack，还有Flume&#43;Kafka&#43;Storm的体系。
+上面这两个方案相对重一些，部署比较复杂，网上介绍的文章也不少。
+比较轻量级的开源日志集中采集方案有python做的Sentry，他是通过改造各种语言的日志采集框架来实现日志的集中采集，各种主流的开发语言的日志框架都支持得很完整了，比如java的log4j和logpack。
+Sentry的官网在此：Sentry - Track exceptions with modern error logging for JavaScript, Python, Ruby, Java, and Node.js
+五、持续集成和发布工具 这方面其实比较难有统一的需求，很多公司集成发布的做法都差异挺大的。
+持续集成方面，一般用jekins的比较多，这方面网上介绍的文章也很多。
+而如何把打好的包发布至各台服务器，则可以通过批量运维工具或者脚本来完成了。
+版本发布的过程涉及到很多细节，包括了版本文件的上传、分发、版本管理、回滚等各种操作。
+对于一般不太复杂的项目，我比较推荐的做法是把打包好的文件上传到svn上，然后通过脚本在各台服务器上进行发布操作就行了，这样其实是利用了SVN来完成文件的上传、分发、版本管理、回滚等各种操作。
+六、安全漏洞扫描工具 现在一个稍微有点知名度的系统，都会遭受各种各样的安全攻击的折磨。
+一般的公司不太可能请得起专职的安全工程师，所以运维工程师最好能自己借助一些安全扫描工具来发现自己系统的漏洞。
+安全工具方面我了解不多，不太熟这个领域的开源工具。
+之前乌云网推出过一个SaaS化的漏扫平台——唐朝巡航，有对外提供漏洞扫描的API，不过最近乌云网一直在升级，所以也就暂时无法调用了。'>
+<meta property='og:url' content='http://zwsuo.github.io/tech/ops/'>
+<meta property='og:site_name' content='zwsuo&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Tech'><meta property='article:published_time' content='2018-02-23T12:32:24&#43;08:00'/><meta property='article:modified_time' content='2018-02-23T12:32:24&#43;08:00'/><meta name='twitter:card' content='summary'>
+
+<meta name="generator" content="Hugo 0.41" />
+
+  <title>运维体系应该是啥样子 • zwsuo&#39;s Blog</title>
+  <link rel='canonical' href='http://zwsuo.github.io/tech/ops/'>
+  
+  
+  <link rel='icon' href='/favicon.ico'>
+<link rel='stylesheet' href='/assets/css/main.f0e8df71.css'><link rel='stylesheet' href='/css/custom.css'>
+</head>
+
+
+<body class='page type-tech'>
+  <div class='site'>
+
+    <a class='screen-reader' href='#main'>Skip to Content</a>
+
+    <header id='header' class='header-container'>
+      <div class='header site-header'>
+        <nav id='main-menu' class='main-menu-container' aria-label='Main Menu'>
+  <ul class='main-menu'>
+  <li>
+      <a href='/'>Home</a>
+    </li>
+  <li>
+      <a href='/tech/'>Tech</a>
+    </li>
+  <li>
+      <a href='/typography/'>Typography</a>
+    </li>
+  <li>
+      <a href='/about/'>About</a>
+    </li>
+  
+  </ul>
+</nav>
+
+        <div class='header-info'>
+          
+          <p class='site-title title'>zwsuo&#39;s Blog</p>
+          
+          <p class='site-description subtitle'>Here&#39;s my life...</p>
+        </div>
+      </div>
+    </header>
+
+
+<main id='main' class='main'>
+  <article lang='en' class='entry'>
+    <header class='header-container'>
+  <div class='header entry-header'>
+    <div class='header-info'>
+      <h1 class='title'>运维体系应该是啥样子</h1>
+      
+
+    </div>
+    
+<div class='meta'>
+  <span class='posted-on'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+  <line x1="16" y1="2" x2="16" y2="6"/>
+  <line x1="8" y1="2" x2="8" y2="6"/>
+  <line x1="3" y1="10" x2="21" y2="10"/>
+  
+</svg>
+<span class='screen-reader'>Posted on </span>
+  <time class='date' datetime='2018-02-23T12:32:24&#43;08:00'>2018, Feb 23</time>
+</span>
+
+  
+  
+<span class='reading-time'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <circle cx="12" cy="12" r="10"/>
+  <polyline points="12 6 12 12 15 15"/>
+  
+</svg>
+One min read
+</span>
+
+
+</div>
+
+
+  </div>
+</header>
+
+    
+    
+
+    <div class='entry-content'>
+  
+
+<div class='align-center'>
+  <h3 id="运维体系应该是啥样子">运维体系应该是啥样子</h3>
+
+</div>
+
+
+<hr />
+
+<blockquote>
+<p>作者：刀把五</p>
+
+<p>链接：<a href="https://www.zhihu.com/question/23228213/answer/116940889" target="_blank">https://www.zhihu.com/question/23228213/answer/116940889</a></p>
+
+<p>来源：知乎</p>
+
+<p>著作权归作者所有。</p>
+</blockquote>
+
+<p>结合现在云计算和DevOps的发展趋势，我觉得一个成熟的自动化运维平台应该包括以下的特性：</p>
+
+<h2 id="一-支持混合云的cmdb">一、支持混合云的CMDB</h2>
+
+<p>现在越来越多的服务器都转到了云上，而主流的公有云、私有云平台都拥有比较完备的资源管理的API，这些API也就是构建一个自动化CMDB的基础。</p>
+
+<p>新一代的自动化运维平台应该是可以基于这些API来自动维护和管理相关的服务器、存储、网络、负载均衡的资源的。</p>
+
+<p>通过API对资源的操作都应该被作为操作日志记录下来，以备作为后续操作审计的基础数据。</p>
+
+<p>CMDB这个东西听上去是老生常谈，但这个确实是所有运维工具的基础设施。</p>
+
+<p>而基于开源工具做运维平台最大的麻烦，就是如何在各个工具之间把CMDB统一起来。</p>
+
+<p>CMDB不统一起来，就意味着一旦要增加一台服务器，可能要在各个运维工具里面都要同步一下，这个还是非常折腾滴。</p>
+
+<h2 id="二-比较完备的监控-应用性能分析-apm">二、比较完备的监控+应用性能分析（APM）</h2>
+
+<p>能支持对平台的可用性、服务器的性能、各种服务（web服务、应用服务、数据库服务）的性能进行监控。做的好一些应该能进行更深入、或者关联性的性能分析。</p>
+
+<p>现在市面上一般都会将资源性能监控和应用性能监控（APM）混合着讲，这里面的产品确实也有很多都是重叠的，两方面都会涉及到。</p>
+
+<p>开源的性能监控系统主流有的Zabbix、Nagios，国产的开源监控平台有小米OpenFalcon，但这些基本都只是做基本的资源监控（服务器，磁盘、网络等）和简单的服务软件的性能监控（中间件，数据库等）。</p>
+
+<p>而市面上的APM系统更主打的功能是应用性能分析，比如能精确定位到某个应用的URL的访问速度快慢，某些SQL执行速度的快慢，这些对于开发人员和运维人员快速定位问题还是很有帮助的。</p>
+
+<p>APM这方面的商业工具，国外比较主流的有New Reclic、Dynatrace，国内的也就是透视宝、Oneapm、听云等，他们也提供了API进行集成。</p>
+
+<p>APM这方面的开源工具有pinpoint（一个韩国团队开源的），zipkin（twitter开源），cat（大众点评开源）。</p>
+
+<h2 id="三-有一个还不错ui的批量运维工具">三、有一个还不错UI的批量运维工具</h2>
+
+<p>在业务发展比较快的情况下，从几台服务器，到几十台服务器，再到几百台服务器，批量运维的需求很自然就产生了，老板也希望越少的人干越多的活。</p>
+
+<p>现在也有不少开源的批量运维工具，也都比较成熟了，比如puppet、chef、ansible、saltstack。</p>
+
+<p>puppet和chef都是ruby做的，实话实说，ruby的熟手市面上很少，比python不是难招一点。</p>
+
+<p>我个人比较推荐使用ansible或者saltstack，这两个系统都是python写的，代码质量和社区活跃度都挺不错的。</p>
+
+<p>ansible有官方的web ui——Tower，但实话实说不好用，所以我们也在重新做一套自己用起来更顺手的WEB UI。</p>
+
+<h2 id="四-日志集中分析工具">四、日志集中分析工具</h2>
+
+<p>线上系统最常规的问题定位方式，就是日志分析了。</p>
+
+<p>随着服务器的增多，日志的分析定位也成为一个难点和痛点（想象一下，系统出故障之后，要去几十甚至数百个节点去上去查日志，是有多折腾）。</p>
+
+<p>国内有一家叫日志易的公司，是专门做日志分析方面的运维工具的。</p>
+
+<p>另外还有一家log insight，也是做这个领域，但产品好像还处于beta阶段。</p>
+
+<p>日志分析这个领域现在是一个热点，现在的开源方案也比较多了，比如著名的ELKStack，还有Flume+Kafka+Storm的体系。</p>
+
+<p>上面这两个方案相对重一些，部署比较复杂，网上介绍的文章也不少。</p>
+
+<p>比较轻量级的开源日志集中采集方案有python做的Sentry，他是通过改造各种语言的日志采集框架来实现日志的集中采集，各种主流的开发语言的日志框架都支持得很完整了，比如java的log4j和logpack。</p>
+
+<p>Sentry的官网在此：Sentry - Track exceptions with modern error logging for JavaScript, Python, Ruby, Java, and Node.js</p>
+
+<h2 id="五-持续集成和发布工具">五、持续集成和发布工具</h2>
+
+<p>这方面其实比较难有统一的需求，很多公司集成发布的做法都差异挺大的。</p>
+
+<p>持续集成方面，一般用jekins的比较多，这方面网上介绍的文章也很多。</p>
+
+<p>而如何把打好的包发布至各台服务器，则可以通过批量运维工具或者脚本来完成了。</p>
+
+<p>版本发布的过程涉及到很多细节，包括了版本文件的上传、分发、版本管理、回滚等各种操作。</p>
+
+<p>对于一般不太复杂的项目，我比较推荐的做法是把打包好的文件上传到svn上，然后通过脚本在各台服务器上进行发布操作就行了，这样其实是利用了SVN来完成文件的上传、分发、版本管理、回滚等各种操作。</p>
+
+<h2 id="六-安全漏洞扫描工具">六、安全漏洞扫描工具</h2>
+
+<p>现在一个稍微有点知名度的系统，都会遭受各种各样的安全攻击的折磨。</p>
+
+<p>一般的公司不太可能请得起专职的安全工程师，所以运维工程师最好能自己借助一些安全扫描工具来发现自己系统的漏洞。</p>
+
+<p>安全工具方面我了解不多，不太熟这个领域的开源工具。</p>
+
+<p>之前乌云网推出过一个SaaS化的漏扫平台——唐朝巡航，有对外提供漏洞扫描的API，不过最近乌云网一直在升级，所以也就暂时无法调用了。</p>
+
+</div>
+
+    
+<footer class='entry-footer-container'>
+  <div class='entry-footer'>
+  
+  </div>
+</footer>
+
+
+  </article>
+  
+<nav class='entry-nav-container'>
+  <div class='entry-nav'><div class='prev-entry'>
+      <a href='/tech/hugepage/'>
+        <span aria-hidden='true'><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <line x1="20" y1="12" x2="4" y2="12"/>
+  <polyline points="10 18 4 12 10 6"/>
+  
+</svg>
+ Previous</span>
+        <span class='screen-reader'>Previous post: </span>Huge page (大内存页) 到底是个啥</a>
+    </div></div>
+</nav>
+
+  
+</main>
+
+    <footer id='footer' class='footer-container'>
+      <div class='footer'>
+        <div class='social-menu-container'>
+  <nav aria-label='Social Menu'>
+    <ul class='social-menu'><li>
+        <a href='https://github.com/zwsuo' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Open Github account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='https://facebook.com/zwsuo' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Open Facebook account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='https://twitter.com/zwsuo' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Open Twitter account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='https://instagram.com/izwsuo' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Open Instagram account in new tab</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+  <line x1="17.5" y1="6.5" x2="17.5" y2="6.5"/>
+  
+</svg>
+</a>
+      </li><li>
+        <a href='mailto:izwsuo@gmail.com' target='_blank' rel='noopener'>
+          <span class='screen-reader'>Contact via Email</span><svg class='icon' viewbox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' aria-hidden='true'>
+  
+  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+  <polyline points="22,6 12,13 2,6"/>
+  
+</svg>
+</a>
+      </li></ul>
+  </nav>
+</div>
+        <div class='copyright'>
+  <p>
+        
+      
+
+       &copy; 2018 zwsuo 
+  </p>
+</div>
+
+      </div>
+    </footer>
+
+  </div><script src='/assets/js/main.5871befd.js'></script><script src='/js/custom.js'></script></body>
+
+</html>
+
